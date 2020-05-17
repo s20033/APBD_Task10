@@ -24,7 +24,7 @@ namespace Task10.Entity
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=db-mssql;Initial Catalog=s19358;Integrated Security=True");
+                optionsBuilder.UseSqlServer("Data Source=db-mssql;Initial Catalog=s20033;Integrated Security=True");
             }
         }
 
@@ -62,6 +62,26 @@ namespace Task10.Entity
                 entity.Property(e => e.LastName)
                     .IsRequired()
                     .HasMaxLength(100);
+
+                entity.Property(e => e.Orijinalpass)
+                    .HasColumnName("orijinalpass")
+                    .HasMaxLength(300)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Password)
+                    .HasColumnName("password")
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Refreshtoken)
+                    .HasColumnName("refreshtoken")
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Salt)
+                    .HasColumnName("salt")
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
 
                 entity.HasOne(d => d.IdEnrollmentNavigation)
                     .WithMany(p => p.Student)
