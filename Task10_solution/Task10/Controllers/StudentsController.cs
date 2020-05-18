@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Task10.Entity;
-using Task10.Model;
+using Task10.DTOs.Requests;
+using Task10.Services;
 
 namespace Task10.Controllers
 {
@@ -14,29 +13,93 @@ namespace Task10.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
-        private readonly StudentContext _studentContext;
-
-        public StudentsController(StudentContext studentContext)
+        private readonly IStudentsDbService _dbService;
+        public StudentsController(IStudentsDbService dbService)
         {
-            _studentContext = studentContext;
+            _dbService = dbService;
         }
 
         [HttpGet]
         public IActionResult GetStudents()
         {
-            var students = _studentContext.Student
-                                          .Include(s => s.IdEnrollmentNavigation).ThenInclude(e => e.IdStudyNavigation)
-                                          .Select(s => new GetStudentsResponse
-                                          {
-                                              IndexNumber = s.IndexNumber,
-                                              FirstName = s.FirstName,
-                                              LastName = s.LastName,
-                                              BirthDate = s.BirthDate.ToShortDateString(),
-                                              Semester = s.IdEnrollmentNavigation.Semester,
-                                              Studies = s.IdEnrollmentNavigation.IdStudyNavigation.Name
-                                          })
-                                          .ToList();
+            var students = _dbService.GetAllStudents();
+
             return Ok(students);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> InsertStudentAsync(InsertStudentRequest isq)
+        {
+            int i = 0;
+
+            i = await _dbService.AddStudentAsync(isq);
+
+            if(i == -1)
+            {
+                return BadRequest();
+            }
+
+            return Ok("Student inserted");
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateStudentAsync(UpdateStudentRequest usr)
+        {
+            int i = 0;
+
+            i = await _dbService.ModifyStudentAsync(usr);
+
+            if (i == -1)
+            {
+                return NotFound("Student with that index number does not exist");
+            }
+
+            return Ok("Student updated");
+        }
+
+        [HttpDelete("{index}")]
+        public async Task<IActionResult> DeleteStudentAsync(string index)
+        {
+            int i = 0;
+
+            i = await _dbService.RemoveStudentAsync(index);
+
+            if (i == -1)
+            {
+                return NotFound("Student with that index number does not exist");
+            }
+
+            return Ok("Student deleted");
+        }
+
+        [HttpPost("addstudies")]
+        public async Task<IActionResult> InsertStudiesAsync(InsertStudiesRequest isq)
+        {
+            int i = 0;
+
+            i = await _dbService.AddStudiesAsync(isq);
+
+            if (i == -1)
+            {
+                return BadRequest();
+            }
+            
+            return Ok();
+        }
+
+        [HttpPost("addenrollment")]
+        public async Task<IActionResult> InsertEnrollmentAsync(InsertEnrollmentRequest ieq)
+        {
+            int i = 0;
+
+            i = await _dbService.AddEnrollmentAsync(ieq);
+
+            if (i == -1)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
         }
     }
 }

@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Task10.Entity;
+using Task10.Services;
 
 namespace Task10
 {
@@ -27,9 +28,8 @@ namespace Task10
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-
-            services.AddDbContext<StudentContext>(o => { o.UseSqlServer(Configuration["Data Source=db-mssql;Initial Catalog=s19358;Integrated Security=True"]); });
+            services.AddTransient<IStudentsDbService, SqlServerDbService>();
+            services.AddDbContext<StudentContext>(o => o.UseSqlServer(Configuration["ConnectionStrings:DefaultConnectionString"]));
             services.AddControllers();
         }
 
@@ -40,6 +40,8 @@ namespace Task10
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 
